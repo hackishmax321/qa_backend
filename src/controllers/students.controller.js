@@ -6,9 +6,10 @@ const StudentService = require('../services/students.service');
 const router = express.Router();
 
 router.post("/register", async (req, res) => {
-  const { email, password, firstName, lastName, universityId, placeholder } = req.body;
-  const student = { email, password, firstName, lastName, universityId, placeholder, approved: true };
-  console.log(student)
+  console.log(req.body);
+  const { email, password, firstName, lastName, fullName, gender, dob, university, universityId, address, country, placeholder } = req.body;
+  const student = { email, password, firstName, lastName, fullName, gender, dob, university, universityId, address, country, placeholder, approved: false };
+  // console.log(student)
   try {
     const newStudent = await StudentService.createStudent(student);
     res.status(httpStatus.CREATED).send(newStudent);
@@ -51,6 +52,31 @@ router.get('/student/:email', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(httpStatus.NOT_FOUND).send({ message: 'Student not found' });
+  }
+});
+
+router.patch('/student/:email', async (req, res) => {
+  const { email } = req.params;
+  const updates = req.body;
+
+  try {
+    const updatedStudent = await StudentService.updateStudentByEmail(email, updates);
+    res.status(httpStatus.OK).send(updatedStudent);
+  } catch (error) {
+    console.error(error);
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ message: 'Failed to update student' });
+  }
+});
+
+router.delete('/student/:email', async (req, res) => {
+  const { email } = req.params;
+
+  try {
+    await StudentService.deleteStudentByEmail(email);
+    res.status(httpStatus.NO_CONTENT).send({ message: 'Student deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ message: 'Failed to delete student' });
   }
 });
 
