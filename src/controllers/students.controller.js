@@ -31,11 +31,23 @@ router.post("/login", async (req, res) => {
   }
 });
 
-router.post('/forgot-password', async (req, res) => {
-  const { email } = req.body;
+router.post("/reset-password", async (req, res) => {
+  const { email, password } = req.body;
 
   try {
-    // await sendPasswordResetEmail(email);
+    const result = await StudentService.resetPassword(email, password);
+    res.status(httpStatus.OK).send(result);
+  } catch (error) {
+    console.error(error);
+    res.status(httpStatus.UNAUTHORIZED).send({ message: error.message });
+  }
+});
+
+router.post('/forgot-password', async (req, res) => {
+  const { email, otp } = req.body;
+
+  try {
+    await StudentService.sendEmail(email, otp);
     res.status(200).send({ message: 'Password reset link sent' });
   } catch (error) {
     console.error(error);

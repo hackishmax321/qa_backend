@@ -2,6 +2,7 @@
 const { Student, studentCollection } = require('../models/student.model');
 const CryptoJS = require('crypto-js');
 const jwt = require('jsonwebtoken');
+const nodemailer = require("nodemailer");
 
 const SECRET_KEY = "jwt_secret";
 
@@ -47,7 +48,9 @@ class StudentService {
     }
 
     const token = jwt.sign({ id: studentDoc.id, email: studentData.email }, SECRET_KEY, { expiresIn: '1h' });
-    return { token, student: { id: studentDoc.id, email: studentData.email, firstName: studentData.firstName, lastName: studentData.lastName, universityId: studentData.universityId, placeholder: studentData.placeholder, approved: studentData.approved } };
+    return { token, student: { id: studentDoc.id, email: studentData.email, firstName: studentData.firstName, 
+      lastName: studentData.lastName, universityId: studentData.universityId, placeholder: studentData.placeholder, 
+      approved: studentData.approved, status: studentData.status } };
   }
 
   async getStudentByEmail(email) {
@@ -91,6 +94,78 @@ class StudentService {
 
     await studentRef.delete();
     return { id: studentDoc.id, message: 'Student deleted successfully' };
+  }
+
+  async sendEmail( recipient_email, OTP ) {
+    return new Promise((resolve, reject) => {
+      var transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: process.env.MY_EMAIL,
+          pass: process.env.MY_PASSWORD,
+        },
+      });
+      console.log(process.env.MY_EMAIL);
+  
+      const mail_configs = {
+        from: process.env.MY_EMAIL,
+        to: recipient_email,
+        subject: "SimONS PASSWORD RECOVERY",
+        html: `<!DOCTYPE html>
+  <html lang="en" >
+  <head>
+    <meta charset="UTF-8">
+    <title>SimOns OTP Code</title>
+    
+  
+  </head>
+  <body>
+  <!-- partial:index.partial.html -->
+  <div style="font-family: Helvetica,Arial,sans-serif;min-width:1000px;overflow:auto;line-height:2">
+    <div style="margin:50px auto;width:70%;padding:20px 0">
+      <div style="border-bottom:1px solid #eee">
+        <a href="" style="font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600">SimONS Site</a>
+      </div>
+      <p style="font-size:1.1em">Hi,</p>
+      <p>Thank you for choosing SimONS. Use the following OTP to complete your Password Recovery Procedure. OTP is valid for Single session</p>
+      <h2 style="background: #00466a;margin: 0 auto;width: max-content;padding: 0 10px;color: #fff;border-radius: 4px;">${OTP}</h2>
+      <p style="font-size:0.9em;">Regards,<br />Koding 101</p>
+      <hr style="border:none;border-top:1px solid #eee" />
+      <div style="float:right;padding:8px 0;color:#aaa;font-size:0.8em;line-height:1;font-weight:300">
+        <p>SimONS</p>
+        <p>Sri Lanka</p>
+      </div>
+    </div>
+  </div>
+  <!-- partial -->
+    
+  </body>
+  </html>`,
+      };
+      transporter.sendMail(mail_configs, function (error, info) {
+        if (error) {
+          console.log(error);
+          return reject({ message: `An error has occured` });
+        }
+        return resolve({ message: "Email sent succesfuly" });
+      });
+    });
+  }
+
+  async resetPassword(email, newPassword) {
+
+    const querySnapshot = await studentCollection.where("email", "==", email).get();
+    if (querySnapshot.empty) {
+      throw new Error("Student not found");
+    }
+
+    const studentDoc = querySnapshot.docs[0];
+    const studentRef = studentCollection.doc(studentDoc.id);
+
+    const encryptedPassword = CryptoJS.AES.encrypt(newPassword, SECRET_KEY).toString();
+    await studentRef.update({ password: encryptedPassword });
+
+    return { id: studentDoc.id, message: 'Password reset successfully' };
   }
 }
 
