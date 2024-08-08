@@ -14,8 +14,8 @@ router.post("/register", async (req, res) => {
     const newStudent = await StudentService.createStudent(student);
     res.status(httpStatus.CREATED).send(newStudent);
   } catch (error) {
-    console.error(error);
-    res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ message: "Server error" });
+    console.error(error.message);
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ message: error.message||"Server error" });
   }
 });
 

@@ -9,6 +9,10 @@ const SECRET_KEY = "jwt_secret";
 class StudentService {
   async createStudent(student) {
     console.log(student);
+    const querySnapshot = await studentCollection.where("email", "==", student.email).get();
+    if (!querySnapshot.empty) {
+      throw new Error("A user already exists under give Email Address");
+    }
     const encryptedPassword = CryptoJS.AES.encrypt(student.password, SECRET_KEY).toString();
     const newStudent = {
       email: student.email,
