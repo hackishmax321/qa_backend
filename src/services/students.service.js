@@ -170,7 +170,7 @@ class StudentService {
       const mail_configs = {
         from: process.env.MY_EMAIL,
         to: recipient_email,
-        subject: "SimONS PASSWORD RECOVERY",
+        subject: "SimONS EMAIL VALIDATION",
         html: `<!DOCTYPE html>
   <html lang="en" >
   <head>
