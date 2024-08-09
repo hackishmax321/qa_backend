@@ -55,6 +55,18 @@ router.post('/forgot-password', async (req, res) => {
   }
 });
 
+router.post('/account-confirm', async (req, res) => {
+  const { email, otp } = req.body;
+
+  try {
+    await StudentService.sendOTP(email, otp);
+    res.status(200).send({ message: 'Password reset link sent' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ message: 'Failed to send reset link' });
+  }
+});
+
 router.get('/student/:email', async (req, res) => {
   const { email } = req.params;
   console.log(email)
