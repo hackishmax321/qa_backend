@@ -114,7 +114,7 @@ class StudentService {
       const mail_configs = {
         from: process.env.MY_EMAIL,
         to: recipient_email,
-        subject: "SimONS PASSWORD RECOVERY",
+        subject: "SimONS application - Password Recovery",
         html: `<!DOCTYPE html>
   <html lang="en" >
   <head>
@@ -128,7 +128,7 @@ class StudentService {
   <div style="font-family: Helvetica,Arial,sans-serif;min-width:1000px;overflow:auto;line-height:2">
     <div style="margin:50px auto;width:70%;padding:20px 0">
       <div style="border-bottom:1px solid #eee">
-        <a href="" style="font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600">SimONS Site</a>
+        <a href="" style="font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600">SimONS Application</a>
       </div>
       <p style="font-size:1.1em">Hi,</p>
       <p>Use the following OTP to complete your Password Recovery Procedure. OTP is valid for Single session</p>
@@ -170,7 +170,7 @@ class StudentService {
       const mail_configs = {
         from: process.env.MY_EMAIL,
         to: recipient_email,
-        subject: "SimONS EMAIL VALIDATION",
+        subject: "SimONS application - Create Account",
         html: `<!DOCTYPE html>
   <html lang="en" >
   <head>
@@ -184,10 +184,10 @@ class StudentService {
   <div style="font-family: Helvetica,Arial,sans-serif;min-width:1000px;overflow:auto;line-height:2">
     <div style="margin:50px auto;width:70%;padding:20px 0">
       <div style="border-bottom:1px solid #eee">
-        <a href="" style="font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600">SimONS Site</a>
+        <a href="" style="font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600">SimONS Application</a>
       </div>
       <p style="font-size:1.1em">Hi,</p>
-      <p>Thank you for choosing SimONS. Use the following OTP to confirm your account. OTP is valid for Single session</p>
+      <p>Thank you for choosing SimONS mobile application. Use the following OTP to confirm your account. OTP is valid for Single session</p>
       <h2 style="background: #00466a;margin: 0 auto;width: max-content;padding: 0 10px;color: #fff;border-radius: 4px;">${OTP}</h2>
       <p style="font-size:0.9em;">Regards,<br />SimONS</p>
       <hr style="border:none;border-top:1px solid #eee" />
