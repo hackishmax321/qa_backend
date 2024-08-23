@@ -227,6 +227,59 @@ class StudentService {
 
     return { id: studentDoc.id, message: 'Password reset successfully' };
   }
+
+  // Test Results
+  async addTestToStudent(email, testData) {
+    // Step 1: Fetch the student document by email
+    const querySnapshot = await studentCollection.where("email", "==", email).get();
+    if (querySnapshot.empty) {
+      throw new Error("Student not found");
+    }
+
+    const studentDoc = querySnapshot.docs[0];
+    const studentRef = studentCollection.doc(studentDoc.id);
+
+    // Step 2: Determine the next document number in the 'tests' subcollection
+    const testsCollectionRef = studentRef.collection('tests');
+    const testsSnapshot = await testsCollectionRef.get();
+
+    const nextTestNumber = testsSnapshot.size + 1;
+    const testDocumentName = nextTestNumber.toString();
+
+    // Step 3: Add a new document to the 'tests' subcollection
+    const newTestRef = testsCollectionRef.doc(testDocumentName);
+    await newTestRef.set(testData);
+
+    return { id: newTestRef.id, ...testData };
+  }
+
+  async getFirstAndLastTest(email) {
+    // Step 1: Fetch the student document by email
+    const querySnapshot = await studentCollection.where("email", "==", email).get();
+    if (querySnapshot.empty) {
+      throw new Error("Student not found");
+    }
+
+    const studentDoc = querySnapshot.docs[0];
+    const studentRef = studentCollection.doc(studentDoc.id);
+
+    // Step 2: Retrieve the first and last test documents
+    const testsCollectionRef = studentRef.collection('tests');
+
+    // Get the first test
+    const firstTestQuery = await testsCollectionRef.orderBy('__name__').limit(1).get();
+    const firstTestDoc = firstTestQuery.empty ? null : firstTestQuery.docs[0].data();
+
+    // Get the last test
+    const lastTestQuery = await testsCollectionRef.orderBy('__name__', 'desc').limit(1).get();
+    const lastTestDoc = lastTestQuery.empty ? null : lastTestQuery.docs[0].data();
+
+    // Step 3: Return the results
+    return {
+      firstTest: firstTestDoc,
+      lastTest: lastTestDoc
+    };
+  }
 }
 
 module.exports = new StudentService();
