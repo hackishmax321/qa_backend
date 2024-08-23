@@ -3,6 +3,7 @@ const { Student, studentCollection } = require('../models/student.model');
 const CryptoJS = require('crypto-js');
 const jwt = require('jsonwebtoken');
 const nodemailer = require("nodemailer");
+const admin = require('firebase-admin');
 
 const SECRET_KEY = "jwt_secret";
 
@@ -235,23 +236,27 @@ class StudentService {
     if (querySnapshot.empty) {
       throw new Error("Student not found");
     }
-
+  
     const studentDoc = querySnapshot.docs[0];
     const studentRef = studentCollection.doc(studentDoc.id);
-
+  
     // Step 2: Determine the next document number in the 'tests' subcollection
     const testsCollectionRef = studentRef.collection('tests');
     const testsSnapshot = await testsCollectionRef.get();
-
+  
     const nextTestNumber = testsSnapshot.size + 1;
     const testDocumentName = nextTestNumber.toString();
-
-    // Step 3: Add a new document to the 'tests' subcollection
+  
+    // Step 3: Add a new document to the 'tests' subcollection with a timestamp
     const newTestRef = testsCollectionRef.doc(testDocumentName);
-    await newTestRef.set(testData);
-
+    await newTestRef.set({
+      ...testData,
+      timestamp: admin.firestore.FieldValue.serverTimestamp() // Add a timestamp field
+    });
+  
     return { id: newTestRef.id, ...testData };
   }
+  
 
   async getFirstAndLastTest(email) {
     // Step 1: Fetch the student document by email
@@ -259,27 +264,28 @@ class StudentService {
     if (querySnapshot.empty) {
       throw new Error("Student not found");
     }
-
+  
     const studentDoc = querySnapshot.docs[0];
     const studentRef = studentCollection.doc(studentDoc.id);
-
-    // Step 2: Retrieve the first and last test documents
+  
+    // Step 2: Retrieve the first and last test documents based on the timestamp
     const testsCollectionRef = studentRef.collection('tests');
-
+  
     // Get the first test
-    const firstTestQuery = await testsCollectionRef.orderBy('__name__').limit(1).get();
+    const firstTestQuery = await testsCollectionRef.orderBy('timestamp').limit(1).get();
     const firstTestDoc = firstTestQuery.empty ? null : firstTestQuery.docs[0].data();
-
+  
     // Get the last test
-    const lastTestQuery = await testsCollectionRef.orderBy('__name__', 'desc').limit(1).get();
+    const lastTestQuery = await testsCollectionRef.orderBy('timestamp', 'desc').limit(1).get();
     const lastTestDoc = lastTestQuery.empty ? null : lastTestQuery.docs[0].data();
-
+  
     // Step 3: Return the results
     return {
       firstTest: firstTestDoc,
       lastTest: lastTestDoc
     };
   }
+  
 }
 
 module.exports = new StudentService();
